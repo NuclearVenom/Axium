@@ -1,4 +1,4 @@
-# <img src="assets/axium-logo.svg" width="28" alt="[logo]" align="bottom" /> Axium
+[![Visit Axium](assets/axium-visit-badge.svg)](https://useaxium.vercel.app)
 
 >*An AI-powered atlas of human knowledge — search a topic, get an explorable graph instead of a list of links.*
 
@@ -13,41 +13,38 @@
 ![Groq](https://img.shields.io/badge/Groq-API_Key-F55036?logo=groq&logoColor=white)
 ![Upstash](https://img.shields.io/badge/Upstash-Redis-00E9A3?logo=upstash&logoColor=white)
 ![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?logo=vercel&logoColor=white)
----
 
-[![Visit Axium](assets/axium-visit-badge.svg)](https://useaxium.vercel.app)
+---
 
 ## Contents
 
-- [ Axium](#-axium)
-  - [](#)
-  - [Contents](#contents)
-  - [Overview](#overview)
-  - [How it works](#how-it-works)
-  - [Why a graph instead of a page](#why-a-graph-instead-of-a-page)
-  - [Features](#features)
-  - [Screenshots](#screenshots)
-  - [Technology stack](#technology-stack)
-  - [Project structure](#project-structure)
-  - [Getting started](#getting-started)
-    - [Prerequisites](#prerequisites)
-    - [1. Configure the server](#1-configure-the-server)
-    - [2. Install and run](#2-install-and-run)
-    - [Verifying the knowledge engine](#verifying-the-knowledge-engine)
-  - [Configuration](#configuration)
-    - [Multiple Groq keys](#multiple-groq-keys)
-  - [Deployment](#deployment)
-    - [How it's wired](#how-its-wired)
-    - [Deploying your own instance](#deploying-your-own-instance)
-    - [Function duration](#function-duration)
-  - [The knowledge engine, in depth](#the-knowledge-engine-in-depth)
-  - [API reference](#api-reference)
-  - [Roadmap](#roadmap)
-  - [Contributing](#contributing)
-  - [Security](#security)
-  - [Citation](#citation)
-  - [License](#license)
-  - [Credits](#credits)
+- [Contents](#contents)
+- [Overview](#overview)
+- [How it works](#how-it-works)
+- [Why a graph instead of a page](#why-a-graph-instead-of-a-page)
+- [Features](#features)
+- [Screenshots](#screenshots)
+- [Technology stack](#technology-stack)
+- [Project structure](#project-structure)
+- [Getting started](#getting-started)
+  - [Prerequisites](#prerequisites)
+  - [1. Configure the server](#1-configure-the-server)
+  - [2. Install and run](#2-install-and-run)
+  - [Verifying the knowledge engine](#verifying-the-knowledge-engine)
+- [Configuration](#configuration)
+  - [Multiple Groq keys](#multiple-groq-keys)
+- [Deployment](#deployment)
+  - [How it's wired](#how-its-wired)
+  - [Deploying your own instance](#deploying-your-own-instance)
+  - [Function duration](#function-duration)
+- [The knowledge engine, in depth](#the-knowledge-engine-in-depth)
+- [API reference](#api-reference)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [Security](#security)
+- [Citation](#citation)
+- [License](#license)
+- [Credits](#credits)
 
 ## Overview
 
