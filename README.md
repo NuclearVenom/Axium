@@ -1,15 +1,26 @@
-# <img src="assets/axium-logo.svg" width="40" alt="Axium logo" /> Axium
+# <img src="assets/axium-logo.svg" width="28" alt="[logo]" align="bottom" /> Axium
 
-*An AI-powered atlas of human knowledge — search a topic, get an explorable graph instead of a list of links.*
+>*An AI-powered atlas of human knowledge — search a topic, get an explorable graph instead of a list of links.*
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
-[![Live demo](https://img.shields.io/badge/useaxium.vercel.app-black?logo=vercel)](https://useaxium.vercel.app)
+[![License: MIT](https://img.shields.io/badge/License-MIT-9E1D32.svg)](./LICENSE)
+![React](https://img.shields.io/badge/React-19-61DAFB?logo=react&logoColor=white)
+![TypeScript](https://img.shields.io/badge/TypeScript-5-3178C6?logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite-7-646CFF?logo=vite&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-22-5FA04E?logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-5-000000?logo=express&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-06B6D4?logo=tailwindcss&logoColor=white)
+![GPT-OSS](https://img.shields.io/badge/GPT--OSS-120B-0A9E7B?logo=openai&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-API_Key-F55036?logo=groq&logoColor=white)
+![Upstash](https://img.shields.io/badge/Upstash-Redis-00E9A3?logo=upstash&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-Deployed-000000?logo=vercel&logoColor=white)
+---
 
-**Repository:** [github.com/NuclearVenom/Axium](https://github.com/NuclearVenom/Axium) · **Visit Website:** [axium.vercel.app](https://useaxium.vercel.app)
+[![Visit Axium](assets/axium-visit-badge.svg)](https://useaxium.vercel.app)
 
 ## Contents
 
 - [ Axium](#-axium)
+  - [](#)
   - [Contents](#contents)
   - [Overview](#overview)
   - [How it works](#how-it-works)
