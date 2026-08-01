@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env
+data/
+*.log
+
+# Legacy multi-provider retrieval/aggregation/fallback engine, preserved locally
+# for reference and possible future reintegration but intentionally not part
+# of the public history of the AI-native architecture. See server/src/deprecated/README.md.
+server/src/deprecated/

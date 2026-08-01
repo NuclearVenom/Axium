@@ -1,0 +1,24 @@
+cff-version: 1.2.0
+message: "If you use Axium in academic or research work, please cite it as below."
+type: software
+title: "Axium: An AI-Native Visual Knowledge Atlas"
+abstract: >
+  Axium is an AI-powered interactive atlas of human knowledge. It transforms
+  any topic into an explorable knowledge graph, generated on demand by a
+  large language model against a strict hierarchical schema, rather than
+  presenting information as articles, search results, or chat responses.
+authors:
+  - family-names: "Ghosh"
+    given-names: "Ranasurya"
+    alias: "NuclearVenom"
+repository-code: "https://github.com/NuclearVenom/Axium"
+url: "https://axium.vercel.app"
+license: MIT
+version: 0.1.0
+keywords:
+  - knowledge-graph
+  - visualization
+  - artificial-intelligence
+  - education
+  - large-language-models
+  - interactive-learning

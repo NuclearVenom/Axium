@@ -1,0 +1,70 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  @apply bg-canvas text-ink antialiased;
+  font-feature-settings: "cv11", "ss01";
+}
+
+html.light body {
+  @apply bg-canvas-light text-ink-light;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: theme("colors.border.DEFAULT") transparent;
+}
+
+::selection {
+  background: rgba(124, 140, 255, 0.25);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Graph selection ring — pulses gently and rotates slowly. Never on unrelated nodes. */
+.selection-ring-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: selectionPulse 2.6s ease-in-out infinite;
+}
+
+.selection-ring-rotate {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: selectionRotate 14s linear infinite;
+}
+
+@keyframes selectionPulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.85;
+  }
+  50% {
+    transform: scale(1.14);
+    opacity: 0.35;
+  }
+}
+
+@keyframes selectionRotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
