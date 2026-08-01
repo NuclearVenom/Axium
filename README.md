@@ -3,9 +3,9 @@
 *An AI-powered atlas of human knowledge — search a topic, get an explorable graph instead of a list of links.*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](./LICENSE)
-[![Live demo](https://img.shields.io/badge/demo-axium.vercel.app-black?logo=vercel)](https://axium.vercel.app)
+[![Live demo](https://img.shields.io/badge/useaxium.vercel.app-black?logo=vercel)](https://useaxium.vercel.app)
 
-**Repository:** [github.com/NuclearVenom/Axium](https://github.com/NuclearVenom/Axium) · **Visit Website:** [axium.vercel.app](https://axium.vercel.app)
+**Repository:** [github.com/NuclearVenom/Axium](https://github.com/NuclearVenom/Axium) · **Visit Website:** [axium.vercel.app](https://useaxium.vercel.app)
 
 ## Contents
 
@@ -175,7 +175,7 @@ axium/
 - Node.js 18 or later
 - A [Groq API key](https://console.groq.com) — the knowledge engine and the AI tutor both require one
 
-Alternatively, the hosted build at [axium.vercel.app](https://axium.vercel.app) requires no setup at all.
+Alternatively, the hosted build at [useaxium.vercel.app](https://useaxium.vercel.app) requires no setup at all.
 
 ### 1. Configure the server
 
