@@ -1,68 +1,32 @@
-import { useEffect, useRef, useState } from "react";
-import { motion, useMotionValue, animate } from "framer-motion";
+import { useEffect, useState } from "react";
 import { ConceptNode, KnowledgeGraph } from "../../types/graph";
 import { ConceptPanelBody } from "./ConceptPanelBody";
 
-const COLLAPSED_HEIGHT = 108; // "bottom" snap — just the head: handle + category + title
-const MIDDLE_RATIO = 0.55; // "middle" snap — roughly half the screen
-const TOP_INSET = 48; // "top" snap always leaves this much of the graph visible above it
-const TOP_HEIGHT_RATIO = 0.94;
-const FLING_VELOCITY = 550; // px/s — above this, a swipe moves one snap point regardless of distance dragged
-const RUBBER_BAND = 0.3; // how much give past the top/bottom snap while actively dragging
+const COLLAPSED_HEIGHT = 108; // just the "head" — drag handle + category + title
+const TOP_INSET = 48; // always leave a sliver of the graph visible, even at max height
+const MAX_HEIGHT_RATIO = 0.94;
 
-interface SnapMetrics {
-  panelHeight: number;
-  /** y-translation for [top, middle, bottom] — the panel's own height never changes, only its position. */
-  snapY: [number, number, number];
-}
-
-function computeSnapMetrics(): SnapMetrics {
-  const vh = window.innerHeight;
-  const panelHeight = Math.min(vh - TOP_INSET, vh * TOP_HEIGHT_RATIO);
-  const middleHeight = Math.min(vh * MIDDLE_RATIO, panelHeight - 40);
-  return {
-    panelHeight,
-    snapY: [0, panelHeight - middleHeight, panelHeight - COLLAPSED_HEIGHT],
-  };
-}
-
-function nearestSnapIndex(snapY: readonly number[], currentY: number): number {
-  let best = 0;
-  let bestDist = Infinity;
-  snapY.forEach((p, i) => {
-    const d = Math.abs(p - currentY);
-    if (d < bestDist) {
-      bestDist = d;
-      best = i;
-    }
-  });
-  return best;
+function getMaxHeight(): number {
+  return Math.min(window.innerHeight - TOP_INSET, window.innerHeight * MAX_HEIGHT_RATIO);
 }
 
 /**
  * The mobile equivalent of the desktop side panel: a sheet docked to the
- * bottom edge, dragged open by its handle, with three resting positions —
- * top (near full screen), middle (about half), and bottom (just the
- * "head" — category and title — peeking up). A fast swipe moves exactly
- * one snap point in that direction regardless of how far it was dragged;
- * a slower drag settles on whichever snap point it ends up nearest to.
+ * bottom edge, dragged open by its handle. Deliberately simple, and
+ * deliberately NOT built on any animation/spring library for the drag
+ * itself — height is plain React state, set directly and only from
+ * pointer events. There is no snapping and no settle animation: wherever
+ * you release it is where it stays. It always opens collapsed at the
+ * bottom, showing just the concept's category and title.
  *
- * The drag itself is tracked manually with plain pointer events (the same
- * approach the desktop panel's resize handle uses) rather than Framer
- * Motion's `drag` gesture system — that's a deliberate choice, not
- * incidental: this used to be built on `dragControls`/`dragListener`, and
- * on real phones it could get stuck mid-drag. The root cause was a
- * settle-animation effect that could fire *during* an active drag (mobile
- * browsers fire `resize` when the address bar shows/hides mid-touch),
- * starting an imperative spring on the same motion value the live drag
- * was writing to — the two fought each other and the sheet stopped
- * responding. Manual tracking sidesteps that class of bug entirely: the
- * settle animation only ever runs once a drag has actually ended.
- *
- * The panel's own height never changes — it's always tall enough for the
- * "top" position — only its vertical position (a `y` transform) does.
- * Animating a transform instead of `height` keeps this on the compositor
- * rather than triggering layout every frame, which is what keeps it smooth.
+ * Earlier versions of this component used Framer Motion's `drag` gesture
+ * system and, later, a spring-based snap-to-position system. Both were
+ * reported stuck/unresponsive on real phones. Rather than keep chasing
+ * that, this version removes every moving part that isn't strictly
+ * necessary: no motion values, no imperative animation, nothing that
+ * could contend with an in-progress drag for control of the panel's
+ * position. The drag itself is the same plain-pointer-event approach the
+ * desktop panel's resize handle already uses successfully.
  */
 export function ConceptPanelMobileSheet({
   graph,
@@ -77,111 +41,30 @@ export function ConceptPanelMobileSheet({
   onClose: () => void;
   onGraphUpdated: (graph: KnowledgeGraph) => void;
 }) {
-  const [metrics, setMetrics] = useState<SnapMetrics>(computeSnapMetrics);
-  // Starts at the "bottom" (collapsed) snap whenever the sheet is freshly
-  // opened for a concept.
-  const [snapIndex, setSnapIndex] = useState<0 | 1 | 2>(2);
+  const [height, setHeight] = useState(COLLAPSED_HEIGHT);
   const [isDragging, setIsDragging] = useState(false);
-
-  // Starts off-screen (below the collapsed position) so the very first
-  // mount animates in as a slide-up rather than appearing instantly.
-  const y = useMotionValue(computeSnapMetrics().panelHeight);
-
-  // Settles to the current snap point — but NEVER while a drag is live.
-  // This guard is the actual fix for the "stuck" bug: without it, a
-  // metrics change mid-drag (see the debounced resize handler below)
-  // could start this animation on top of an in-progress drag and the two
-  // would fight over the same motion value.
-  useEffect(() => {
-    if (isDragging) return;
-    const controls = animate(y, metrics.snapY[snapIndex], {
-      type: "spring",
-      bounce: 0.22,
-      duration: 0.5,
-    });
-    return () => controls.stop();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [snapIndex, metrics, isDragging]);
-
-  // Re-derive snap positions on resize/rotation, keeping whichever snap
-  // (top/middle/bottom) is currently active rather than the exact pixel.
-  // Debounced because mobile browsers fire `resize` repeatedly as their
-  // address bar shows/hides during ordinary touch interaction, not just
-  // on real rotation/resize.
-  useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout> | undefined;
-    const handleResize = () => {
-      clearTimeout(timeout);
-      timeout = setTimeout(() => setMetrics(computeSnapMetrics()), 200);
-    };
-    window.addEventListener("resize", handleResize);
-    return () => {
-      clearTimeout(timeout);
-      window.removeEventListener("resize", handleResize);
-    };
-  }, []);
-
-  // Manual drag tracking — see the component doc comment for why this
-  // isn't Framer Motion's `drag` prop. `dragState` holds the pointer/
-  // panel position at drag start; using a ref (not state) means pointer
-  // moves never trigger a re-render, only direct motion-value writes do.
-  const dragState = useRef<{ pointerId: number; startClientY: number; startY: number } | null>(null);
 
   useEffect(() => {
     if (!isDragging) return;
 
     let rafId: number | null = null;
-    let pendingY: number | null = null;
-    let lastSampleTime = performance.now();
-    let lastSampleY = y.get();
-    let velocity = 0;
+    let pendingHeight: number | null = null;
 
-    const applyPendingY = () => {
-      if (pendingY !== null) y.set(pendingY);
+    const applyPendingHeight = () => {
+      if (pendingHeight !== null) setHeight(pendingHeight);
       rafId = null;
     };
-
     const handleMove = (event: PointerEvent) => {
-      const start = dragState.current;
-      if (!start || event.pointerId !== start.pointerId) return;
-
-      const delta = event.clientY - start.startClientY;
-      const raw = start.startY + delta;
-      const [minY, , maxY] = metrics.snapY;
-
-      // A little give past the edges instead of a hard stop — this is
-      // the "goes a little beyond" feel while actively dragging past the
-      // top/bottom snap; the settle spring provides the matching effect
-      // on release.
-      let next = raw;
-      if (raw < minY) next = minY + (raw - minY) * RUBBER_BAND;
-      else if (raw > maxY) next = maxY + (raw - maxY) * RUBBER_BAND;
-
-      const now = performance.now();
-      const dt = now - lastSampleTime;
-      if (dt > 0) velocity = ((next - lastSampleY) / dt) * 1000; // px/s
-      lastSampleTime = now;
-      lastSampleY = next;
-
-      pendingY = next;
-      if (rafId === null) rafId = requestAnimationFrame(applyPendingY);
+      const raw = window.innerHeight - event.clientY;
+      pendingHeight = Math.min(Math.max(raw, COLLAPSED_HEIGHT), getMaxHeight());
+      if (rafId === null) rafId = requestAnimationFrame(applyPendingHeight);
     };
+    const endDrag = () => setIsDragging(false);
 
-    const endDrag = () => {
-      dragState.current = null;
-      setIsDragging(false);
-
-      const nearest = nearestSnapIndex(metrics.snapY, y.get());
-      let target = nearest;
-      if (velocity < -FLING_VELOCITY) target = Math.max(0, nearest - 1); // swiped up -> one step toward "top"
-      else if (velocity > FLING_VELOCITY) target = Math.min(2, nearest + 1); // swiped down -> one step toward "bottom"
-      setSnapIndex(target as 0 | 1 | 2);
-    };
-
+    document.body.style.userSelect = "none";
     window.addEventListener("pointermove", handleMove);
     window.addEventListener("pointerup", endDrag);
     window.addEventListener("pointercancel", endDrag);
-    document.body.style.userSelect = "none";
 
     return () => {
       if (rafId !== null) cancelAnimationFrame(rafId);
@@ -190,21 +73,26 @@ export function ConceptPanelMobileSheet({
       window.removeEventListener("pointerup", endDrag);
       window.removeEventListener("pointercancel", endDrag);
     };
-  }, [isDragging, metrics]);
+  }, [isDragging]);
 
-  const handlePointerDown = (event: React.PointerEvent) => {
-    event.preventDefault();
-    dragState.current = { pointerId: event.pointerId, startClientY: event.clientY, startY: y.get() };
-    setIsDragging(true);
-  };
+  // Re-clamp on rotation/resize so the sheet can't end up taller than the
+  // (new) viewport if the device is rotated while it's open.
+  useEffect(() => {
+    const handleResize = () => setHeight((h) => Math.min(h, getMaxHeight()));
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
-    <motion.div
-      style={{ y, height: metrics.panelHeight, willChange: "transform" }}
+    <div
+      style={{ height: `${height}px` }}
       className="pointer-events-auto fixed inset-x-0 bottom-0 z-20 flex flex-col overflow-hidden rounded-t-2xl border-t border-white/10 bg-panel/70 shadow-[0_-16px_40px_rgba(0,0,0,0.3)] backdrop-blur-2xl animate-fade-in"
     >
       <div
-        onPointerDown={handlePointerDown}
+        onPointerDown={(e) => {
+          e.preventDefault();
+          setIsDragging(true);
+        }}
         style={{ touchAction: "none" }}
         className="flex shrink-0 cursor-grab touch-none flex-col items-center gap-1 py-4 active:cursor-grabbing"
         role="separator"
@@ -217,6 +105,6 @@ export function ConceptPanelMobileSheet({
       <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
         <ConceptPanelBody graph={graph} concept={concept} onNavigate={onNavigate} onClose={onClose} onGraphUpdated={onGraphUpdated} />
       </div>
-    </motion.div>
+    </div>
   );
 }
